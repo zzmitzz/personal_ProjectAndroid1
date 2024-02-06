@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">MitMusic</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Search</string>
+    <string name="title_notifications">Nearby</string>
+    <string name="setting_button">Setting</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="HomeWelcome">Welcome</string>
+    <string name="music_searching">Music Searching</string>
+    <string name="generateai">GenerateAI</string>
+    <string name="favorite">Favorite</string>
+    <string name="dark_mode">Dark Mode</string>
+    <string name="log_out">Log out</string>
+    <string name="favorite_artist">Favorite Artist</string>
+    <string name="love_song">Love Song</string>
+    <string name="library">Library</string>
+    <string name="english">English</string>
+</resources>

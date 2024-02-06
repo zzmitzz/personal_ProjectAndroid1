@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/home_app"
+        android:icon="@drawable/ic_home_black_24dp"
+        android:title="@string/title_home" />
+
+    <item
+        android:id="@+id/searching_app"
+        android:icon="@drawable/baseline_search_24"
+        android:title="@string/title_dashboard" />
+
+    <item
+        android:id="@+id/nearby_app"
+        android:icon="@drawable/graphic_eq_fill0_wght400_grad0_opsz24"
+        android:title="@string/generateai" />
+    <item
+        android:id="@+id/favourite"
+        android:icon="@drawable/favoriteicon"
+        android:title="@string/favorite"/>
+    <item
+        android:id="@+id/setting_app"
+        android:icon="@drawable/baseline_settings_24"
+        android:title="@string/setting_button" />
+</menu>

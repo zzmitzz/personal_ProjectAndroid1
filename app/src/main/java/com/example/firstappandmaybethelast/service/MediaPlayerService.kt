@@ -9,7 +9,9 @@ import android.graphics.BitmapFactory
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.os.Binder
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.util.Log
 import android.widget.RemoteViews
 import android.widget.Toast
@@ -149,23 +151,21 @@ class MediaPlayerService : Service(), MediaPlayer.OnErrorListener{
          super.onRebind(intent)
      }
      override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-
-             try {
-                 val bundle = intent?.extras
-                 val music = bundle?.get("song") as Music
-                 songID = music.id
-                 songTitle = music.title
-                 songArtist = music.artist
-                 songCover = BitmapFactory.decodeResource(resources, music.imageResource)
-                 mediaFile = music.musicSource
-             } catch (e: NullPointerException) {
-                 stopSelf()
-             }
+         try {
+             val bundle = intent?.extras
+             val music = bundle?.get("song") as Music
+             songID = music.id
+             mediaFile = music.musicSource
+         } catch (e: NullPointerException) {
+             stopSelf()
+         }
+         Handler(Looper.getMainLooper()).postDelayed({
              if (mediaFile != "" && songID != currentSource) {
                  mediaInitial()
-                 sendNotificationService()
+//                 sendNotificationService()
                  currentSource = songID
              }
+         },500)
          return START_STICKY
      }
 

@@ -1,5 +1,5 @@
 package com.example.firstappandmaybethelast.musicdata
 
 object MusicData {
-    val musicList: List<Music> = emptyList()
+    var musicList: List<Music> = emptyList()
 }

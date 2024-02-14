@@ -13,8 +13,6 @@ class MainActivity : AppCompatActivity() {
     private val binding by lazy(LazyThreadSafetyMode.NONE) {
         ActivityMainBinding.inflate(layoutInflater)
     }
-
-
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -23,6 +21,7 @@ class MainActivity : AppCompatActivity() {
             changeFragment(it.itemId)
             return@setOnItemSelectedListener true
         }
+
         supportFragmentManager.beginTransaction().add(R.id.fragmentContainerView, HomeFragment()).commit()
 
     }
@@ -52,6 +51,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
-
+        const val TAG = "MainActivity"
     }
 }

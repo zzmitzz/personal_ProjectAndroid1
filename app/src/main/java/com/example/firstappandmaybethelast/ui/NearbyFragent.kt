@@ -5,7 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.example.firstappandmaybethelast.R
+import com.example.firstappandmaybethelast.viewmodel.NearByViewModel
 
 /**
  * A simple [Fragment] subclass.
@@ -13,7 +15,7 @@ import com.example.firstappandmaybethelast.R
  * create an instance of this fragment.
  */
 class NearbyFragent : Fragment() {
-
+    private val viewModel by viewModels<NearByViewModel>()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?

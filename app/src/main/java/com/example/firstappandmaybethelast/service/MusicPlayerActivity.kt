@@ -6,11 +6,13 @@ import android.app.NotificationManager
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
+import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.util.Log
 import android.view.animation.LinearInterpolator
 import android.widget.ImageButton
 import android.widget.SeekBar
@@ -25,6 +27,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.net.URL
 import java.text.SimpleDateFormat
 
 
@@ -42,6 +45,7 @@ class MusicPlayerActivity : AppCompatActivity() {
     private var replay = false
     private var shuffle = false
     private var listMusicData = MusicData.musicList
+
     private val connection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(componentName: ComponentName?, service: IBinder?) {
             val binder = service as MediaPlayerService.MyBinder
@@ -74,7 +78,7 @@ class MusicPlayerActivity : AppCompatActivity() {
     }
     @SuppressLint("SimpleDateFormat", "SetTextI18n")
     private fun seekBarFuture(){
-        seekBar.max = mService!!.length
+        seekBar.max = mService?.mediaPlayer?.duration ?: 0
         binding.starttime.text = "00:00"
         binding.endtime.text = SimpleDateFormat("mm:ss").format(mService!!.length)
 
@@ -130,7 +134,12 @@ class MusicPlayerActivity : AppCompatActivity() {
     }
     private fun initialSongPlayer(){
         musicInstance = listMusicData[position]
-        binding.musicCover.setImageResource(musicInstance.imageResource)
+        try {
+            val image = BitmapFactory.decodeStream(URL(musicInstance.imageResource).openConnection().getInputStream())
+            binding.musicCover.setImageBitmap(image)
+        }catch (e: Exception){
+            binding.musicCover.setImageResource(R.drawable.db)
+        }
         binding.tvMusicName.text = musicInstance.title
         binding.tvArtistName.text = musicInstance.artist
         stopRotateCover()
@@ -145,12 +154,10 @@ class MusicPlayerActivity : AppCompatActivity() {
                     startRotateCover()
                     buttonPlay.setImageResource(R.drawable.stop_fill0_wght400_grad0_opsz24)
                 }
+                Log.d("TAG", "initialSongPlayer: ${mService!!.length}")
                 seekBarFuture()
                 buttonListener()
-
         }
-
-
     }
     private fun uiBuilding(){
         buttonPlay = binding.playbtn

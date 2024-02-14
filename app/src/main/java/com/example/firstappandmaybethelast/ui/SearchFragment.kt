@@ -7,13 +7,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.firstappandmaybethelast.adapter.MusicAdapter
 import com.example.firstappandmaybethelast.databinding.FragmentSearchBinding
 import com.example.firstappandmaybethelast.musicdata.Music
 import com.example.firstappandmaybethelast.musicdata.MusicData
 import com.example.firstappandmaybethelast.service.MusicPlayerActivity
+import com.example.firstappandmaybethelast.viewmodel.SearchViewModel
 
 /**
  * A simple [Fragment] subclass.
@@ -26,8 +27,7 @@ class SearchFragment : Fragment() {
         FragmentSearchBinding.inflate(layoutInflater)
     }
     private lateinit var musicList: List<Music>
-
-    private val musicAdapter = MusicAdapter()
+    private val viewmodel by viewModels<SearchViewModel>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,14 +36,14 @@ class SearchFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         musicList = MusicData.musicList
-        musicAdapter.setMusic(musicList)
+        viewmodel.musicAdapter.setMusic(musicList)
         binding.rcvSearch.run {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(context)
-            adapter = musicAdapter
+            adapter = viewmodel.musicAdapter
             addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
         }
-        musicAdapter.onItemClick = {
+        viewmodel.musicAdapter.onItemClick = {
             val intent = Intent(context, MusicPlayerActivity::class.java)
             intent.putExtra("mediaPosition", it)
             startActivity(intent)
@@ -59,22 +59,14 @@ class SearchFragment : Fragment() {
                 return false
             }
             override fun onQueryTextChange(newText: String?): Boolean {
-                filterArray(newText)
+                viewmodel.filterArray(newText)
                 return true
             }
         })
         super.onViewCreated(view, savedInstanceState)
     }
 
-    fun filterArray(newText: String?){
-        val filterList = ArrayList<Music>()
-        for(music in musicList){
-            if(music.title.lowercase().contains(newText!!.lowercase())){
-                filterList.add(music)
-            }
-            musicAdapter.setMusic(filterList)
-        }
-    }
+
 
     companion object{
         const val TAG: String = "Search Fragment"

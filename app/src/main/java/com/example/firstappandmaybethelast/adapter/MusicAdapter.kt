@@ -1,11 +1,14 @@
 package com.example.firstappandmaybethelast.adapter
 
 import android.annotation.SuppressLint
+import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.firstappandmaybethelast.R
 import com.example.firstappandmaybethelast.databinding.MusicitemsBinding
 import com.example.firstappandmaybethelast.musicdata.Music
+import java.net.URL
 
 class MusicAdapter: RecyclerView.Adapter<MusicAdapter.ViewHolderMusic>() {
 
@@ -24,7 +27,13 @@ class MusicAdapter: RecyclerView.Adapter<MusicAdapter.ViewHolderMusic>() {
             binding.run {
                 textView.text = music.title
                 textView2.text = music.artist
-                imageView.setImageResource(music.imageResource)
+                try {
+                    val image = BitmapFactory.decodeStream(URL(music.imageResource).openConnection().getInputStream())
+                    imageView.setImageBitmap(image)
+                }catch (e: Exception){
+                    imageView.setImageResource(R.drawable.db)
+                }
+
             }
         }
     }

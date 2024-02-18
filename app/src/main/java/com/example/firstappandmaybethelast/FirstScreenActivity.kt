@@ -4,17 +4,17 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.firstappandmaybethelast.databinding.SplashscreenBinding
 import com.example.firstappandmaybethelast.model.ServiceLocator
-import com.example.firstappandmaybethelast.musicdata.MusicData
+import com.example.firstappandmaybethelast.musicdata.Music
+import io.realm.kotlin.UpdatePolicy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import org.bson.types.ObjectId
 import java.io.IOException
 import java.net.InetSocketAddress
 import java.net.Socket
@@ -34,7 +34,6 @@ class FirstScreenActivity : AppCompatActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             isOnline = isOnline()
         }
-        Toast.makeText(applicationContext,"Checking Internet Connection", Toast.LENGTH_SHORT).show()
         Handler(Looper.getMainLooper()).postDelayed({
             if(!isOnline){
                 Toast.makeText(this@FirstScreenActivity, "No Internet connection", Toast.LENGTH_LONG).show()
@@ -43,15 +42,18 @@ class FirstScreenActivity : AppCompatActivity() {
                 }, 1000)
             }else{
                 CoroutineScope(Dispatchers.IO).launch{
-//                val connection = async { MongoClientConnectionExample }.await()
-                    withContext(Dispatchers.Main){
-                        Toast.makeText(applicationContext,"Success", Toast.LENGTH_SHORT).show()
+                    var result: List<Music>? = async { ServiceLocator.apiAction.getSong() }.await()
+                    // Write to local db Realm
+                    ext.realm.write {
+                        if(ext.realm.query(com.example.firstappandmaybethelast.realmdb.Music::class).find().isEmpty()){
+                            for(music in result!!){
+                                copyToRealm(cvtToRealm(music), updatePolicy = UpdatePolicy.ALL)
+                            }
+                        }
                     }
-                    val result = async { ServiceLocator.apiAction.getSong() }.await()
-                    MusicData.musicList = result
-                    Log.d(MainActivity.TAG, "onCreate: $result")
                     Intent(this@FirstScreenActivity,MainActivity::class.java).run {
                         startActivity(this)
+                        result = null
                     }
                     finish()
                 }
@@ -71,6 +73,17 @@ class FirstScreenActivity : AppCompatActivity() {
             true
         } catch (e: IOException) {
             false
+        }
+    }
+    private fun cvtToRealm(music: Music): com.example.firstappandmaybethelast.realmdb.Music{
+
+        return com.example.firstappandmaybethelast.realmdb.Music().apply {
+            id = ObjectId(music.id)
+            title = music.title
+            artist = music.artist
+            genre = music.genre
+            musicSource = music.musicSource
+            imageResource = music.imageResource
         }
     }
 }

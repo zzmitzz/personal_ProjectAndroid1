@@ -1,8 +1,13 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("io.realm.kotlin")
 }
-
+buildscript{
+    dependencies{
+        classpath("io.realm:realm-gradle-plugin:3.2.0")
+    }
+}
 android {
     namespace = "com.example.firstappandmaybethelast"
     compileSdk = 34
@@ -50,10 +55,11 @@ dependencies {
     implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
     testImplementation("junit:junit:4.13.2")
     implementation("org.mongodb:bson-kotlinx:4.11.0")
-    implementation("org.mongodb:mongodb-driver-legacy:4.1.1")
     implementation("de.hdodenhof:circleimageview:3.1.0")
     implementation("androidx.media:media:1.7.0")
     implementation("com.google.code.gson:gson:2.10.1")
+    implementation("io.realm.kotlin:library-base:1.11.0")
+    implementation("io.realm.kotlin:library-sync:1.11.0")
     implementation("androidx.fragment:fragment-ktx:1.6.2")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")

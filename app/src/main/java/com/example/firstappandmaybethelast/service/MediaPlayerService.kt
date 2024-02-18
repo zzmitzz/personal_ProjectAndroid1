@@ -9,16 +9,15 @@ import android.graphics.BitmapFactory
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.os.Binder
-import android.os.Handler
 import android.os.IBinder
-import android.os.Looper
 import android.util.Log
 import android.widget.RemoteViews
-import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import com.example.firstappandmaybethelast.R
-import com.example.firstappandmaybethelast.musicdata.Music
 import com.example.firstappandmaybethelast.service.MusicPlayerActivity.Companion.CHANNEL_ID
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 class MediaPlayerService : Service(), MediaPlayer.OnErrorListener{
@@ -41,8 +40,7 @@ class MediaPlayerService : Service(), MediaPlayer.OnErrorListener{
      val mediaCurrentPosition: Int
          get() = mediaPlayer!!.currentPosition
      var resumePlayer = 0
-     private var _successOnPrepare: Boolean = false
-     val successOnPrepare get() = _successOnPrepare
+     var _successOnPrepare: Boolean = false
 
      fun playMedia() = mediaPlayer!!.start()
      private fun stopMedia(){
@@ -70,25 +68,22 @@ class MediaPlayerService : Service(), MediaPlayer.OnErrorListener{
      private fun mediaInitial(){
          resumePlayer = 0
          mediaPlayer?.reset()
-         mediaPlayer = MediaPlayer().apply {
-             setAudioAttributes(
-                 AudioAttributes.Builder()
-                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                     .setUsage(AudioAttributes.USAGE_MEDIA)
-                     .build()
-             )
-             setDataSource(mediaFile)
-             prepareAsync()
-             setOnPreparedListener{
-                 _length = mediaPlayer!!.duration
-                 _successOnPrepare = true
+         CoroutineScope(Dispatchers.IO).launch {
+              mediaPlayer = MediaPlayer().apply {
+                 setAudioAttributes(
+                     AudioAttributes.Builder()
+                         .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                         .setUsage(AudioAttributes.USAGE_MEDIA)
+                         .build()
+                 )
+                 setDataSource(mediaFile)
+                 prepareAsync()
+                 setOnPreparedListener {
+                     _length = this.duration
+                     _successOnPrepare = true
+                     Log.d("TAG", "mediaInitial: $length")
+                 }
              }
-             setOnErrorListener{ _, _, _ ->
-                 Toast.makeText(applicationContext,"Check your connection",Toast.LENGTH_SHORT).show()
-                 false
-             }
-
-
          }
      }
      private fun sendNotificationService(){
@@ -151,21 +146,24 @@ class MediaPlayerService : Service(), MediaPlayer.OnErrorListener{
          super.onRebind(intent)
      }
      override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+         Log.d("TAG", "onStartCommand: $startId")
          try {
-             val bundle = intent?.extras
-             val music = bundle?.get("song") as Music
-             songID = music.id
-             mediaFile = music.musicSource
+             val music = intent?.getParcelableExtra<com.example.firstappandmaybethelast.realmdb.Music>("song")
+             if (music != null) {
+                 songID = music.id.toString()
+             }
+             if (music != null) {
+                 mediaFile = music.musicSource
+             }
+             Log.d("TAG", "onStartCommand: $mediaFile")
          } catch (e: NullPointerException) {
              stopSelf()
          }
-         Handler(Looper.getMainLooper()).postDelayed({
-             if (mediaFile != "" && songID != currentSource) {
-                 mediaInitial()
+         if (mediaFile != "" && songID != currentSource) {
+             mediaInitial()
 //                 sendNotificationService()
-                 currentSource = songID
-             }
-         },500)
+             currentSource = songID
+         }
          return START_STICKY
      }
 

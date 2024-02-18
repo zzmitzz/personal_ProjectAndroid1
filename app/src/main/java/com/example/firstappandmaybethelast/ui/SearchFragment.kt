@@ -11,6 +11,7 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.firstappandmaybethelast.databinding.FragmentSearchBinding
+import com.example.firstappandmaybethelast.ext
 import com.example.firstappandmaybethelast.musicdata.Music
 import com.example.firstappandmaybethelast.musicdata.MusicData
 import com.example.firstappandmaybethelast.service.MusicPlayerActivity
@@ -36,7 +37,7 @@ class SearchFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         musicList = MusicData.musicList
-        viewmodel.musicAdapter.setMusic(musicList)
+        viewmodel.musicAdapter.setMusic(ext.realm.query(com.example.firstappandmaybethelast.realmdb.Music::class).find().toList())
         binding.rcvSearch.run {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(context)

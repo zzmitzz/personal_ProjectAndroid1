@@ -9,9 +9,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.firstappandmaybethelast.adapter.MusicListAdapter
 import com.example.firstappandmaybethelast.databinding.FragmentHomeBinding
-import com.example.firstappandmaybethelast.musicdata.MusicData.musicList
+import com.example.firstappandmaybethelast.ext
+import com.example.firstappandmaybethelast.realmdb.Music
 import com.example.firstappandmaybethelast.service.MusicPlayerActivity
 import com.example.firstappandmaybethelast.viewmodel.HomeViewModel
 
@@ -38,7 +38,7 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle ?
     ): View {
-        viewModel.musicAdapter.setMusic(musicList)
+        viewModel.musicAdapter.setMusic(ext.realm.query(Music::class).find().toList())
         setupRecycleView()
         return binding.root
     }
@@ -46,7 +46,7 @@ class HomeFragment : Fragment() {
     private fun setupRecycleView(){
         binding.rcv1.run {
             setHasFixedSize(true)
-            adapter = MusicListAdapter()
+            adapter = viewModel.musicPlaylistAdapter
         }
         binding.rcv2.run {
             setHasFixedSize(true)

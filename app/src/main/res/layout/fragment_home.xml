@@ -28,7 +28,7 @@
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
             android:layout_marginEnd="20dp"
-            android:background="@color/white"
+            android:background="@android:color/transparent"
             android:contentDescription="Notification"
             android:src="@drawable/ic_notifications_black_24dp" />
         <ImageButton
@@ -38,7 +38,7 @@
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
             android:layout_marginStart="10dp"
-            android:background="@color/white"
+            android:background="@android:color/transparent"
             android:contentDescription="Account Detail"
             android:src="@drawable/baseline_account_circle_24" />
     </RelativeLayout>
@@ -71,6 +71,7 @@
             />
 
     </LinearLayout>
+
     <LinearLayout
         android:id="@+id/Linear2"
         android:layout_width="match_parent"

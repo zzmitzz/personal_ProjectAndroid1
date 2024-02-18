@@ -19,14 +19,16 @@ import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
 import com.example.firstappandmaybethelast.R
 import com.example.firstappandmaybethelast.databinding.MusicplayerfragmentBinding
-import com.example.firstappandmaybethelast.musicdata.Music
-import com.example.firstappandmaybethelast.musicdata.MusicData
+import com.example.firstappandmaybethelast.ext
+import com.example.firstappandmaybethelast.realmdb.Music
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.net.HttpURLConnection
 import java.net.URL
 import java.text.SimpleDateFormat
 
@@ -44,7 +46,7 @@ class MusicPlayerActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
     private var replay = false
     private var shuffle = false
-    private var listMusicData = MusicData.musicList
+    private var listMusicData = ext.realm.query(Music::class).find().toList()
 
     private val connection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(componentName: ComponentName?, service: IBinder?) {
@@ -57,9 +59,7 @@ class MusicPlayerActivity : AppCompatActivity() {
     }
     private fun playAudio(music: Music){
         Intent(this, MediaPlayerService::class.java).also {
-            val bundle = Bundle()
-            bundle.putSerializable("song",music)
-            it.putExtras(bundle)
+            it.putExtra("song", musicInstance)
             mBound = bindService(it, connection, BIND_AUTO_CREATE)
             startService(it)
         }
@@ -78,7 +78,7 @@ class MusicPlayerActivity : AppCompatActivity() {
     }
     @SuppressLint("SimpleDateFormat", "SetTextI18n")
     private fun seekBarFuture(){
-        seekBar.max = mService?.mediaPlayer?.duration ?: 0
+        seekBar.max = mService!!.length
         binding.starttime.text = "00:00"
         binding.endtime.text = SimpleDateFormat("mm:ss").format(mService!!.length)
 
@@ -121,10 +121,11 @@ class MusicPlayerActivity : AppCompatActivity() {
         })
     }
     private fun nextSong(){
-        if(replay) listMusicData.shuffled()
-        else listMusicData = MusicData.musicList
+//        if(shuffle) listMusicData.shuffled()
+//        else listMusicData = MusicData.musicList
         position += 1
         position %= listMusicData.size
+        Log.d("TAG", "nextSong: $position")
         initialSongPlayer()
     }
     private fun prevSong(){
@@ -134,22 +135,25 @@ class MusicPlayerActivity : AppCompatActivity() {
     }
     private fun initialSongPlayer(){
         musicInstance = listMusicData[position]
-        try {
-            val image = BitmapFactory.decodeStream(URL(musicInstance.imageResource).openConnection().getInputStream())
-            binding.musicCover.setImageBitmap(image)
-        }catch (e: Exception){
-            binding.musicCover.setImageResource(R.drawable.db)
+        CoroutineScope(Dispatchers.IO).launch {
+            val url = URL(musicInstance.imageResource)
+            val connection = url.openConnection() as HttpURLConnection
+            val myBitmap = BitmapFactory.decodeStream(connection.inputStream)
+            withContext(Dispatchers.Main) {
+                binding.musicCover.setImageBitmap(myBitmap)
+            }
         }
+        stopRotateCover()
         binding.tvMusicName.text = musicInstance.title
         binding.tvArtistName.text = musicInstance.artist
-        stopRotateCover()
         binding.playbtn.setImageResource(R.drawable.play_arrow_fill0_wght400_grad0_opsz24)
         CoroutineScope(Job() + Dispatchers.Main).launch {
                 playAudio(musicInstance)
-                delay(200L)
-                while(!mService!!.successOnPrepare){
+                if(mService == null) delay(200L) // For getting mService ready
+                while(!mService!!._successOnPrepare){
                     delay(50)
                 }
+                mService!!._successOnPrepare = false
                 if(mService!!.getPlayerStatus){
                     startRotateCover()
                     buttonPlay.setImageResource(R.drawable.stop_fill0_wght400_grad0_opsz24)
@@ -220,12 +224,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         position = intent.getIntExtra(mediaPosition, 0)
         createNotificationChannel()
         uiBuilding()
-
-    }
-    override fun onResume() {
         initialSongPlayer()
-
-        super.onResume()
     }
     override fun onDestroy() {
         super.onDestroy()

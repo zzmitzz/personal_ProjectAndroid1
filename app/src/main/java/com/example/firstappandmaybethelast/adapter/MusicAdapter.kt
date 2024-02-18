@@ -5,10 +5,15 @@ import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.firstappandmaybethelast.R
 import com.example.firstappandmaybethelast.databinding.MusicitemsBinding
-import com.example.firstappandmaybethelast.musicdata.Music
+import com.example.firstappandmaybethelast.realmdb.Music
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.net.HttpURLConnection
 import java.net.URL
+
 
 class MusicAdapter: RecyclerView.Adapter<MusicAdapter.ViewHolderMusic>() {
 
@@ -27,14 +32,18 @@ class MusicAdapter: RecyclerView.Adapter<MusicAdapter.ViewHolderMusic>() {
             binding.run {
                 textView.text = music.title
                 textView2.text = music.artist
-                try {
-                    val image = BitmapFactory.decodeStream(URL(music.imageResource).openConnection().getInputStream())
-                    imageView.setImageBitmap(image)
-                }catch (e: Exception){
-                    imageView.setImageResource(R.drawable.db)
+                CoroutineScope(Dispatchers.IO).launch {
+                    val url = URL(music.imageResource)
+                    val connection = url.openConnection() as HttpURLConnection
+                    val myBitmap = BitmapFactory.decodeStream(connection.inputStream)
+                    withContext(Dispatchers.Main) {
+                        imageView.setImageBitmap(myBitmap)
+                    }
                 }
+                // Query for Realm if this music in the favorite list
 
             }
+
         }
     }
 

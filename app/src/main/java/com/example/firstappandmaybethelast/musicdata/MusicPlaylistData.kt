@@ -1,9 +1,16 @@
 package com.example.firstappandmaybethelast.musicdata
 
-data class MusicPlaylistData (
-    val id: String,
-    val title: String,
-    val duration: Long,
-    val imageSource: Int,
-    val musicList: List<Music> = MusicData.musicList
-)
+import com.example.firstappandmaybethelast.R
+object MusicPlaylistData {
+    val listData =
+        List(10) {
+            MusicPlaylist(
+                id = it.toString(),
+                title = "HaoNhan$it",
+                duration = 1000,
+                imageSource = R.drawable.db,
+                musicList = MusicData.musicList
+            )
+
+        }
+}

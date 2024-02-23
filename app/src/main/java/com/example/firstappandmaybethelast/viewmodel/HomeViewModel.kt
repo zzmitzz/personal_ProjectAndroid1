@@ -9,7 +9,7 @@ import com.example.firstappandmaybethelast.musicdata.MusicPlaylistData
 import com.example.firstappandmaybethelast.realmdb.Music
 
 class HomeViewModel: ViewModel() {
-    private var _musicList: List<Music> = ext.realm.query(Music::class).find().toList()
+    private var _musicList: List<Music> = ext.getMusicData()
     private var _musicPlaylistList: List<MusicPlaylist> = MusicPlaylistData.listData
     private val _musicAdapter = MusicAdapter()
     private val _musicPlaylistAdapter = MusicListAdapter()
@@ -18,7 +18,8 @@ class HomeViewModel: ViewModel() {
     val musicAdapter: MusicAdapter
         get() = _musicAdapter
     init {
-        _musicAdapter.setMusic(_musicList)
+        ext.listMusic = _musicList
+        _musicAdapter.setMusic(ext.listMusic)
         _musicPlaylistAdapter.setMusic(_musicPlaylistList)
     }
 }

@@ -4,7 +4,7 @@ import com.example.firstappandmaybethelast.R
 object MusicPlaylistData {
     val listData =
         List(10) {
-            MusicPlaylist(
+            com.example.firstappandmaybethelast.musicdata.MusicPlaylist(
                 id = it.toString(),
                 title = "HaoNhan$it",
                 duration = 1000,

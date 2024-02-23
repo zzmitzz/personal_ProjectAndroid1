@@ -32,12 +32,13 @@ class MusicAdapter: RecyclerView.Adapter<MusicAdapter.ViewHolderMusic>() {
             binding.run {
                 textView.text = music.title
                 textView2.text = music.artist
+                textView.isSelected = true
                 CoroutineScope(Dispatchers.IO).launch {
                     val url = URL(music.imageResource)
                     val connection = url.openConnection() as HttpURLConnection
                     val myBitmap = BitmapFactory.decodeStream(connection.inputStream)
                     withContext(Dispatchers.Main) {
-                        imageView.setImageBitmap(myBitmap)
+                        imageItem.setImageBitmap(myBitmap)
                     }
                 }
                 // Query for Realm if this music in the favorite list

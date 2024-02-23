@@ -10,11 +10,12 @@ class SearchViewModel: ViewModel() {
     val musicAdapter = _musicAdapter
     fun filterArray(newText: String?){
         val filterList = ArrayList<Music>()
-        for(music in ext.realm.query(Music::class).find().toList()){
+        for(music in ext.listMusic){
             if(music.title.lowercase().contains(newText!!.lowercase())){
                 filterList.add(music)
             }
-            musicAdapter.setMusic(filterList)
         }
+        ext.listMusic = filterList
+        musicAdapter.setMusic(filterList)
     }
 }

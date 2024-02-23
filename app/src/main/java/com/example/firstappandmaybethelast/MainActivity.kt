@@ -21,7 +21,6 @@ class MainActivity : AppCompatActivity() {
             changeFragment(it.itemId)
             return@setOnItemSelectedListener true
         }
-
         supportFragmentManager.beginTransaction().add(R.id.fragmentContainerView, HomeFragment()).commit()
 
     }

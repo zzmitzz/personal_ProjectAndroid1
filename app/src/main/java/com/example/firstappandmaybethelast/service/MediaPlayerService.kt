@@ -1,20 +1,12 @@
 package com.example.firstappandmaybethelast.service
 
-import android.app.Notification
-import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.os.Binder
 import android.os.IBinder
 import android.util.Log
-import android.widget.RemoteViews
-import androidx.core.app.NotificationCompat
-import com.example.firstappandmaybethelast.R
-import com.example.firstappandmaybethelast.service.MusicPlayerActivity.Companion.CHANNEL_ID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,12 +16,10 @@ class MediaPlayerService : Service(), MediaPlayer.OnErrorListener{
      //
      private val myBinder = MyBinder()
      var mediaPlayer: MediaPlayer? = null
-     private lateinit var mediaFile : String
+     private var mediaFile : String = ""
      private var currentSource: String = ""
      private lateinit var songID: String
-    private lateinit var songTitle: String
-    private lateinit var songArtist: String
-    private lateinit var songCover: Bitmap
+     private lateinit var musicAction: MusicAction
      val mediaPlayerIsNull: Boolean
          get() = mediaPlayer == null
      private var _length = 0
@@ -41,8 +31,6 @@ class MediaPlayerService : Service(), MediaPlayer.OnErrorListener{
          get() = mediaPlayer!!.currentPosition
      var resumePlayer = 0
      var _successOnPrepare: Boolean = false
-
-     fun playMedia() = mediaPlayer!!.start()
      private fun stopMedia(){
          if(mediaPlayer!!.isPlaying) mediaPlayer!!.stop()
      }
@@ -55,8 +43,6 @@ class MediaPlayerService : Service(), MediaPlayer.OnErrorListener{
              mediaPlayer!!.pause()
              resumePlayer = mediaPlayer!!.currentPosition
          }
-
-
      }
      fun resumeMedia(){
          if (!mediaPlayer!!.isPlaying) {
@@ -68,57 +54,23 @@ class MediaPlayerService : Service(), MediaPlayer.OnErrorListener{
      private fun mediaInitial(){
          resumePlayer = 0
          mediaPlayer?.reset()
-         CoroutineScope(Dispatchers.IO).launch {
-              mediaPlayer = MediaPlayer().apply {
-                 setAudioAttributes(
-                     AudioAttributes.Builder()
-                         .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                         .setUsage(AudioAttributes.USAGE_MEDIA)
-                         .build()
-                 )
-                 setDataSource(mediaFile)
-                 prepareAsync()
-                 setOnPreparedListener {
-                     _length = this.duration
-                     _successOnPrepare = true
-                     Log.d("TAG", "mediaInitial: $length")
-                 }
+         mediaPlayer = MediaPlayer().apply {
+             setAudioAttributes(
+                 AudioAttributes.Builder()
+                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                     .setUsage(AudioAttributes.USAGE_MEDIA)
+                     .build()
+             )
+             setDataSource(mediaFile)
+             prepareAsync()
+             setOnPreparedListener {
+                 _length = this.duration
+                 _successOnPrepare = true
+                 Log.d("TAG", "mediaInitial: $length")
              }
          }
      }
-     private fun sendNotificationService(){
-         val notificationIntent = Intent(this, MusicPlayerActivity::class.java)
-         val pendingIntent = PendingIntent.getActivity(
-             this, 0,
-             notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT )
-         val musicCover = BitmapFactory.decodeResource(resources,R.drawable.db)
-         val remoteView = RemoteViews(packageName, R.layout.playernotification)
-         remoteView.setTextViewText(R.id.title_notification,songTitle)
-         remoteView.setTextViewText(R.id.textView8,songArtist)
-         remoteView.setImageViewBitmap(R.id.imageView,BitmapFactory.decodeResource(resources,R.drawable.db))
-         val prevPending: PendingIntent = PendingIntent
-             .getBroadcast(this,0,Intent(this,NotificationBroadcastRcv::class.java).setAction(
-                 ACTION_PREV),PendingIntent.FLAG_IMMUTABLE)
-         val resumePending: PendingIntent = PendingIntent
-             .getBroadcast(this,0,Intent(this,NotificationBroadcastRcv::class.java).setAction(
-                 ACTION_PLAY),PendingIntent.FLAG_IMMUTABLE)
-         val nextPending: PendingIntent = PendingIntent
-             .getBroadcast(this,0,Intent(this,NotificationBroadcastRcv::class.java).setAction(
-                 ACTION_NEXT),PendingIntent.FLAG_IMMUTABLE)
-         remoteView.setOnClickPendingIntent(R.id.preBtn,prevPending)
-         remoteView.setOnClickPendingIntent(R.id.resumebtn,resumePending)
-         remoteView.setOnClickPendingIntent(R.id.nexBtn,nextPending)
 
-         val notification: Notification = NotificationCompat.Builder(this,CHANNEL_ID)
-             .setSmallIcon(R.drawable.graphic_eq_fill0_wght400_grad0_opsz24)
-             .setContentTitle("P_Music")
-             .setContentText("Play_music")
-             .setCustomContentView(remoteView)
-             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-             .setSound(null)
-             .build()
-         startForeground(1337, notification)
-     }
 
      override fun onError(mp: MediaPlayer?, what: Int, extra: Int): Boolean {
          //Invoked when there has been an error during an asynchronous operation
@@ -141,28 +93,41 @@ class MediaPlayerService : Service(), MediaPlayer.OnErrorListener{
          return false
      }
      override fun onBind(p0: Intent?): IBinder  = myBinder
-
-     override fun onRebind(intent: Intent?) {
-         super.onRebind(intent)
+     fun setCallback(action: MusicAction){
+        this.musicAction = action
+         Log.d("NOTIFICATION_BROADCAST", "setCallback")
      }
      override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-         Log.d("TAG", "onStartCommand: $startId")
          try {
+             Log.d("NOTIFICATION_BROADCAST", "onStartCommand")
              val music = intent?.getParcelableExtra<com.example.firstappandmaybethelast.realmdb.Music>("song")
              if (music != null) {
-                 songID = music.id.toString()
-             }
-             if (music != null) {
+                 songID = music._id
                  mediaFile = music.musicSource
+             }else{
+                 Log.d("NOTIFICATION_BROADCAST", "adsf")
+                 Log.d("NOTIFICATION_BROADCAST", intent?.getStringExtra("action") ?: "")
+                 when(intent?.getStringExtra("action")){
+                     ACTION_NEXT -> {
+                         musicAction.nextSong()
+                     }
+                     ACTION_PREV -> {
+                        musicAction.prevSong()
+                     }
+                     ACTION_PLAY -> {
+                         musicAction.playPause()
+                     }
+                 }
              }
-             Log.d("TAG", "onStartCommand: $mediaFile")
          } catch (e: NullPointerException) {
              stopSelf()
          }
-         if (mediaFile != "" && songID != currentSource) {
-             mediaInitial()
-//                 sendNotificationService()
+         if (mediaFile != "" && currentSource != songID) {
+
              currentSource = songID
+             CoroutineScope(Dispatchers.IO).launch {
+                 mediaInitial()
+             }
          }
          return START_STICKY
      }
@@ -180,7 +145,6 @@ class MediaPlayerService : Service(), MediaPlayer.OnErrorListener{
          stopSelf()
      }
      companion object{
-         const val TAG = "MediaPlayerService"
          val ACTION_NEXT = "NEXT"
          val ACTION_PREV = "PREVIOUS"
          val ACTION_PLAY = "PLAY"

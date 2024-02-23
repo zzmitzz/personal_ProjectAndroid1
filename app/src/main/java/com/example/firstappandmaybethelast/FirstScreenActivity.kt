@@ -14,7 +14,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import org.bson.types.ObjectId
 import java.io.IOException
 import java.net.InetSocketAddress
 import java.net.Socket
@@ -44,18 +43,21 @@ class FirstScreenActivity : AppCompatActivity() {
                 CoroutineScope(Dispatchers.IO).launch{
                     var result: List<Music>? = async { ServiceLocator.apiAction.getSong() }.await()
                     // Write to local db Realm
-                    ext.realm.write {
-                        if(ext.realm.query(com.example.firstappandmaybethelast.realmdb.Music::class).find().isEmpty()){
-                            for(music in result!!){
-                                copyToRealm(cvtToRealm(music), updatePolicy = UpdatePolicy.ALL)
+                    async {
+                        ext.realm.write {
+                            if(ext.getMusicData().size != result!!.size){
+                                deleteAll()
+                                for((index,music) in result!!.withIndex()){
+                                    copyToRealm(cvtToRealm(music,index), updatePolicy = UpdatePolicy.ALL)
+                                }
                             }
                         }
-                    }
-                    Intent(this@FirstScreenActivity,MainActivity::class.java).run {
-                        startActivity(this)
-                        result = null
-                    }
-                    finish()
+                        Intent(this@FirstScreenActivity,MainActivity::class.java).run {
+                            startActivity(this)
+                            result = null
+                        }
+                        finish()
+                    }.await()
                 }
             }
         },1000)
@@ -75,15 +77,17 @@ class FirstScreenActivity : AppCompatActivity() {
             false
         }
     }
-    private fun cvtToRealm(music: Music): com.example.firstappandmaybethelast.realmdb.Music{
+    private fun cvtToRealm(music: Music, index: Int): com.example.firstappandmaybethelast.realmdb.Music{
 
         return com.example.firstappandmaybethelast.realmdb.Music().apply {
-            id = ObjectId(music.id)
+            _id = music.id
             title = music.title
             artist = music.artist
             genre = music.genre
             musicSource = music.musicSource
             imageResource = music.imageResource
+            isFavorite = false
+            order = index
         }
     }
 }

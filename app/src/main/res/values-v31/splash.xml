@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <style name="Theme.MySplash" parent="Theme.SplashScreen">
-        <item name="android:windowSplashScreenBackground">#fd2c18</item>
-        <item name="android:windowSplashScreenAnimationDuration">5000</item>
-    </style>
-</resources>

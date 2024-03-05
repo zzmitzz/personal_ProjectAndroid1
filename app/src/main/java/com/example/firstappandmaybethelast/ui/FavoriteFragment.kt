@@ -9,7 +9,7 @@ import androidx.fragment.app.viewModels
 import com.example.firstappandmaybethelast.databinding.FragmentFavoritePageBinding
 import com.example.firstappandmaybethelast.viewmodel.FavoriteViewModel
 
-class FavoritePage : Fragment() {
+class FavoriteFragment : Fragment() {
     private val binding by lazy {
         FragmentFavoritePageBinding.inflate(layoutInflater)
     }

@@ -13,5 +13,4 @@ data class Music(
     val musicSource: String,
     @SerializedName("imagecover")
     val imageResource: String,
-
 ) : Serializable

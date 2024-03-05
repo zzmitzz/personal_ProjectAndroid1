@@ -1,18 +1,22 @@
-package com.example.firstappandmaybethelast
+package com.example.firstappandmaybethelast.uiactivity
 
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.firstappandmaybethelast.databinding.SplashscreenBinding
+import com.example.firstappandmaybethelast.ext
 import com.example.firstappandmaybethelast.model.ServiceLocator
+import com.example.firstappandmaybethelast.musicdata.Album
 import com.example.firstappandmaybethelast.musicdata.Music
 import io.realm.kotlin.UpdatePolicy
+import io.realm.kotlin.ext.realmListOf
+import io.realm.kotlin.types.RealmObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.net.InetSocketAddress
@@ -41,30 +45,45 @@ class FirstScreenActivity : AppCompatActivity() {
                 }, 1000)
             }else{
                 CoroutineScope(Dispatchers.IO).launch{
-                    var result: List<Music>? = async { ServiceLocator.apiAction.getSong() }.await()
-                    // Write to local db Realm
-                    async {
-                        ext.realm.write {
-                            if(ext.getMusicData().size != result!!.size){
-                                deleteAll()
-                                for((index,music) in result!!.withIndex()){
-                                    copyToRealm(cvtToRealm(music,index), updatePolicy = UpdatePolicy.ALL)
-                                }
-                            }
+                    Log.d("firstScreen", "Data preparing")
+                    runOnUiThread {
+                        binding.processText.text = "Downloading Music..."
+                    }
+                    var result: List<Music>? = ServiceLocator.apiAction.getSong()
+                    runOnUiThread{
+                        binding.processText.text = "Downloading Album..."
+                    }
+                    val resultAlbum: List<Album> = ServiceLocator.apiAction.getAlbum()
+//                    Log.d("firstScreen", resultAlbum[0].tracks.toString())
+//                     Write to local db Realm
+                    ext.realm.write {
+                        deleteAll()
+                        for((index,music) in result!!.withIndex()){
+                            copyToRealm(cvtToRealmMusic(music,index), updatePolicy = UpdatePolicy.ALL)
                         }
-                        Intent(this@FirstScreenActivity,MainActivity::class.java).run {
-                            startActivity(this)
-                            result = null
+                        for((index,album) in resultAlbum.withIndex()){
+                            copyToRealm(cvtToRealmAlbum(album,index), updatePolicy = UpdatePolicy.ALL)
                         }
-                        finish()
-                    }.await()
+                    }
+                    Intent(this@FirstScreenActivity, WelcomePage::class.java).run {
+                        startActivity(this)
+                        result = null
+                    }
+                    finish()
                 }
             }
         },1000)
-
-
-
     }
+
+    private fun cvtToRealmAlbum(album: Album, index: Int): RealmObject {
+        return com.example.firstappandmaybethelast.realmdb.Album().apply {
+            this.id = album.id
+            this.title = album.nameAlbum
+            this.imageSource = album.image.trim()
+            this.musicList = realmListOf()
+        }
+    }
+
     private fun isOnline(): Boolean {
         return try {
             val timeoutMs = 1500
@@ -77,8 +96,7 @@ class FirstScreenActivity : AppCompatActivity() {
             false
         }
     }
-    private fun cvtToRealm(music: Music, index: Int): com.example.firstappandmaybethelast.realmdb.Music{
-
+    private fun cvtToRealmMusic(music: Music, index: Int): com.example.firstappandmaybethelast.realmdb.Music{
         return com.example.firstappandmaybethelast.realmdb.Music().apply {
             _id = music.id
             title = music.title

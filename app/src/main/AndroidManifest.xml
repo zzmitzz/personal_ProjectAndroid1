@@ -32,18 +32,22 @@
 
 
         </receiver>
-        <activity android:name=".FirstScreenActivity"
+        <activity android:name=".uiactivity.FirstScreenActivity"
                 android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".uiactivity.PlaylistActivityLazy"/>
         <activity
             android:name=".service.MusicPlayerActivity"
             android:exported="true"
             android:theme="@style/Theme.FirstAppandMaybeTheLast"
             />
+        <activity android:name=".uiactivity.WelcomePage">
+        </activity>
+        <activity android:name=".uiactivity.LoginPage"/>
         <activity
             android:name=".MainActivity"
             android:exported="true">

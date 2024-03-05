@@ -5,14 +5,12 @@ import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.Ignore
 import io.realm.kotlin.types.annotations.PrimaryKey
-import org.bson.types.ObjectId
 
-class MusicPlaylist: RealmObject {
+class Album: RealmObject {
     @PrimaryKey
     @Ignore
-     var id: ObjectId = ObjectId()
+     var id: String = ""
      var title: String = ""
-    var duration: Long = 0
      var imageSource: String = ""
-     var musicList: RealmList<Music> = realmListOf()
+     var musicList: RealmList<String> = realmListOf()
 }

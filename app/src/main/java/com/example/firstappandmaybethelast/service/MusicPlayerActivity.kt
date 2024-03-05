@@ -22,6 +22,7 @@ import androidx.core.app.NotificationCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.firstappandmaybethelast.ApplicationClass
 import com.example.firstappandmaybethelast.R
+import com.example.firstappandmaybethelast.R.drawable.icon
 import com.example.firstappandmaybethelast.databinding.MusicplayerfragmentBinding
 import com.example.firstappandmaybethelast.ext
 import com.example.firstappandmaybethelast.realmdb.Music
@@ -51,7 +52,7 @@ class MusicPlayerActivity : AppCompatActivity(), MusicAction {
     private val handler = Handler(Looper.getMainLooper())
     private var replay = false
     private var shuffle = false
-    private var listMusicData = ext.listMusic
+    private var listMusicData = ext.customListMusic
     private lateinit var notificationManager : NotificationManager
     private val connection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(componentName: ComponentName?, service: IBinder?) {
@@ -65,6 +66,7 @@ class MusicPlayerActivity : AppCompatActivity(), MusicAction {
             mBound = false
         }
     }
+
     private fun playAudio(){
         Intent(this, MediaPlayerService::class.java).also {
             it.putExtra("song", musicInstance)
@@ -114,12 +116,14 @@ class MusicPlayerActivity : AppCompatActivity(), MusicAction {
                 mService!!.mediaPlayer?.setOnCompletionListener {
                     if (!replay) {
                         nextSong()
+                        sendNotificationService(R.drawable.play_arrow_fill0_wght400_grad0_opsz24)
                     } else {
                         lifecycleScope.launch {
                             mService!!.resumePlayer = 0
                             mService!!.resumeMedia()
                             startRotateCover()
                             buttonPlay.setImageResource(R.drawable.stop_fill0_wght400_grad0_opsz24)
+                            sendNotificationService(R.drawable.stop_fill0_wght400_grad0_opsz24)
                         }
                     }
                 }
@@ -127,6 +131,7 @@ class MusicPlayerActivity : AppCompatActivity(), MusicAction {
             }
         })
     }
+
      override fun nextSong(){
         if(shuffle) {
             position = Random.nextInt(0, listMusicData.size - 1)
@@ -176,7 +181,7 @@ class MusicPlayerActivity : AppCompatActivity(), MusicAction {
             ),
                 PendingIntent.FLAG_IMMUTABLE)
         val notification: Notification = NotificationCompat.Builder(applicationContext, ApplicationClass.CHANNEL_ID_2)
-            .setSmallIcon(R.drawable.icon)
+            .setSmallIcon(icon)
             .setLargeIcon(picture)
             .setContentTitle(musicInstance.title)
             .setContentText(musicInstance.artist)

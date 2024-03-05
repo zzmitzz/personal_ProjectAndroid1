@@ -1,18 +1,13 @@
 package com.example.firstappandmaybethelast.adapter
 
 import android.annotation.SuppressLint
-import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.firstappandmaybethelast.R
 import com.example.firstappandmaybethelast.databinding.MusicitemsBinding
 import com.example.firstappandmaybethelast.realmdb.Music
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.net.HttpURLConnection
-import java.net.URL
+import com.squareup.picasso.Picasso
 
 
 class MusicAdapter: RecyclerView.Adapter<MusicAdapter.ViewHolderMusic>() {
@@ -33,18 +28,15 @@ class MusicAdapter: RecyclerView.Adapter<MusicAdapter.ViewHolderMusic>() {
                 textView.text = music.title
                 textView2.text = music.artist
                 textView.isSelected = true
-                CoroutineScope(Dispatchers.IO).launch {
-                    val url = URL(music.imageResource)
-                    val connection = url.openConnection() as HttpURLConnection
-                    val myBitmap = BitmapFactory.decodeStream(connection.inputStream)
-                    withContext(Dispatchers.Main) {
-                        imageItem.setImageBitmap(myBitmap)
-                    }
-                }
+                Picasso.get()
+                    .load(music.imageResource)
+                    .error(R.drawable.db)
+                    .into(imageItem)
                 // Query for Realm if this music in the favorite list
-
+//                var isFav = ext.realm.query(FavoriteMusic::class).find("")
+                favbtn.setOnClickListener {
+                }
             }
-
         }
     }
 
@@ -66,5 +58,6 @@ class MusicAdapter: RecyclerView.Adapter<MusicAdapter.ViewHolderMusic>() {
         holder.itemView.setOnClickListener{
             onItemClick?.invoke(position)
         }
+
     }
 }

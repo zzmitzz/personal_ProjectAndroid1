@@ -5,12 +5,11 @@ import io.realm.kotlin.types.RealmList
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.Ignore
 import io.realm.kotlin.types.annotations.PrimaryKey
-import org.bson.types.ObjectId
 
 class Artist: RealmObject {
     @PrimaryKey
     @Ignore
-     var id: ObjectId = ObjectId()
+     var id: String = ""
      var name: String = ""
      var born: String = ""
      var description: String = ""

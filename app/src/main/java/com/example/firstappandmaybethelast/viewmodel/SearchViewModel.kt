@@ -11,11 +11,11 @@ class SearchViewModel: ViewModel() {
     fun filterArray(newText: String?){
         val filterList = ArrayList<Music>()
         for(music in ext.listMusic){
-            if(music.title.lowercase().contains(newText!!.lowercase())){
+            if(music.title.lowercase().startsWith(newText!!.lowercase(),true)){
                 filterList.add(music)
             }
         }
-        ext.listMusic = filterList
+        ext.customListMusic = filterList
         musicAdapter.setMusic(filterList)
     }
 }

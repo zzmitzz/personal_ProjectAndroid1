@@ -66,6 +66,7 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     implementation("androidx.media3:media3-exoplayer:1.2.1")
     implementation("androidx.media3:media3-ui:1.2.1")
+    implementation("com.squareup.picasso:picasso:2.8")
     implementation("androidx.media3:media3-common:1.2.1")
     implementation("androidx.core:core-splashscreen:1.0.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

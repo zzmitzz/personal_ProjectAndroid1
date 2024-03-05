@@ -95,7 +95,6 @@ class MediaPlayerService : Service(), MediaPlayer.OnErrorListener{
      override fun onBind(p0: Intent?): IBinder  = myBinder
      fun setCallback(action: MusicAction){
         this.musicAction = action
-         Log.d("NOTIFICATION_BROADCAST", "setCallback")
      }
      override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
          try {
@@ -123,7 +122,6 @@ class MediaPlayerService : Service(), MediaPlayer.OnErrorListener{
              stopSelf()
          }
          if (mediaFile != "" && currentSource != songID) {
-
              currentSource = songID
              CoroutineScope(Dispatchers.IO).launch {
                  mediaInitial()

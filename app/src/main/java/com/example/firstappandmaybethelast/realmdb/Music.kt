@@ -3,6 +3,7 @@ package com.example.firstappandmaybethelast.realmdb
 import android.os.Parcel
 import android.os.Parcelable
 import io.realm.kotlin.types.RealmObject
+import io.realm.kotlin.types.annotations.Ignore
 import io.realm.kotlin.types.annotations.PrimaryKey
 
 class Music() : RealmObject, Parcelable {
@@ -51,4 +52,10 @@ class Music() : RealmObject, Parcelable {
             return arrayOfNulls(size)
         }
     }
+}
+
+class FavoriteMusic():  RealmObject{
+    @PrimaryKey
+    @Ignore
+    val id: String = ""
 }

@@ -11,8 +11,8 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.firstappandmaybethelast.databinding.FragmentHomeBinding
 import com.example.firstappandmaybethelast.ext
-import com.example.firstappandmaybethelast.realmdb.Music
 import com.example.firstappandmaybethelast.service.MusicPlayerActivity
+import com.example.firstappandmaybethelast.uiactivity.PlaylistActivityLazy
 import com.example.firstappandmaybethelast.viewmodel.HomeViewModel
 
 
@@ -21,11 +21,18 @@ class HomeFragment : Fragment() {
     private val binding: FragmentHomeBinding by lazy {
         FragmentHomeBinding.inflate(layoutInflater)
     }
+
     private val viewModel by viewModels<HomeViewModel>()
     override fun onCreate(savedInstanceState: Bundle?) {
         viewModel.musicAdapter.onItemClick = {
             Intent(context,MusicPlayerActivity::class.java).apply {
                 putExtra("mediaPosition", it)
+                startActivity(this)
+            }
+        }
+        viewModel.musicPlaylistAdapter.itemClick = {
+            Intent(context,PlaylistActivityLazy::class.java).apply {
+                putExtra("album", it)
                 startActivity(this)
             }
         }
@@ -38,7 +45,7 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle ?
     ): View {
-        viewModel.musicAdapter.setMusic(ext.realm.query(Music::class).find().toList())
+        viewModel.musicAdapter.setMusic(ext.listMusic)
         setupRecycleView()
         return binding.root
     }

@@ -2,7 +2,7 @@ package com.example.firstappandmaybethelast
 
 import androidx.appcompat.app.AppCompatActivity
 import com.example.firstappandmaybethelast.databinding.ActivityMainBinding
-import com.example.firstappandmaybethelast.ui.FavoritePage
+import com.example.firstappandmaybethelast.ui.FavoriteFragment
 import com.example.firstappandmaybethelast.ui.HomeFragment
 import com.example.firstappandmaybethelast.ui.NearbyFragent
 import com.example.firstappandmaybethelast.ui.SearchFragment
@@ -21,6 +21,7 @@ class MainActivity : AppCompatActivity() {
             changeFragment(it.itemId)
             return@setOnItemSelectedListener true
         }
+        ext.listMusic = ext.getMusicData()
         supportFragmentManager.beginTransaction().add(R.id.fragmentContainerView, HomeFragment()).commit()
 
     }
@@ -43,7 +44,7 @@ class MainActivity : AppCompatActivity() {
 //                    true
             }
             R.id.favourite -> {
-                supportFragmentManager.beginTransaction().replace(R.id.fragmentContainerView, FavoritePage()).commit()
+                supportFragmentManager.beginTransaction().replace(R.id.fragmentContainerView, FavoriteFragment()).commit()
             }
         }
 

@@ -46,6 +46,7 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle ?
     ): View {
         viewModel.musicAdapter.setMusic(ext.listMusic)
+        ext.customListMusic = ext.listMusic
         setupRecycleView()
         return binding.root
     }

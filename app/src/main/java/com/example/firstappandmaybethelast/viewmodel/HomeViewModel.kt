@@ -13,7 +13,6 @@ class HomeViewModel: ViewModel() {
     val musicAdapter: MusicAdapter
         get() = _musicAdapter
     init {
-        ext.customListMusic = ext.listMusic
         ext.customAlbumList = ext.getAlbumData().toMutableList()
         _musicPlaylistAdapter.setList(ext.customAlbumList)
         _musicAdapter.setMusic(ext.customListMusic)

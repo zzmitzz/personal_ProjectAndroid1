@@ -13,7 +13,6 @@ import com.example.firstappandmaybethelast.model.ServiceLocator
 import com.example.firstappandmaybethelast.musicdata.Album
 import com.example.firstappandmaybethelast.musicdata.Music
 import io.realm.kotlin.UpdatePolicy
-import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -80,7 +79,8 @@ class FirstScreenActivity : AppCompatActivity() {
             this.id = album.id
             this.title = album.nameAlbum
             this.imageSource = album.image.trim()
-            this.musicList = realmListOf()
+            val listIDMusic: List<String> = album.tracks
+            this.musicList.addAll(listIDMusic)
         }
     }
 

@@ -7,6 +7,7 @@ import android.util.Log
 import com.example.firstappandmaybethelast.ApplicationClass.Companion.ACTION_NEXT
 import com.example.firstappandmaybethelast.ApplicationClass.Companion.ACTION_PLAY
 import com.example.firstappandmaybethelast.ApplicationClass.Companion.ACTION_PREV
+import com.example.firstappandmaybethelast.service.MediaPlayerService.Companion.ACTION_KILL
 
 class NotificationBroadcastRcv : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
@@ -25,6 +26,10 @@ class NotificationBroadcastRcv : BroadcastReceiver() {
                 }
                 ACTION_PLAY -> also {
                     callIntent.putExtra("action", ACTION_PLAY)
+                    context?.startService(callIntent)
+                }
+                ACTION_KILL -> also {
+                    callIntent.putExtra("action", ACTION_KILL)
                     context?.startService(callIntent)
                 }
             }

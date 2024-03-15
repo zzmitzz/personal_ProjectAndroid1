@@ -1,15 +1,25 @@
 package com.example.firstappandmaybethelast.service
 
+import android.app.Notification
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.os.Binder
 import android.os.IBinder
 import android.util.Log
+import androidx.core.app.NotificationCompat
+import com.example.firstappandmaybethelast.ApplicationClass
+import com.example.firstappandmaybethelast.R
+import com.example.firstappandmaybethelast.ext
+import com.example.firstappandmaybethelast.realmdb.Music
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class MediaPlayerService : Service(), MediaPlayer.OnErrorListener{
@@ -17,9 +27,11 @@ class MediaPlayerService : Service(), MediaPlayer.OnErrorListener{
      private val myBinder = MyBinder()
      var mediaPlayer: MediaPlayer? = null
      private var mediaFile : String = ""
-     private var currentSource: String = ""
      private lateinit var songID: String
+     private lateinit var musicInstance: Music
      private lateinit var musicAction: MusicAction
+     private var currentSong: String? = null
+     private var mbitmap: Bitmap? = null
      val mediaPlayerIsNull: Boolean
          get() = mediaPlayer == null
      private var _length = 0
@@ -42,12 +54,14 @@ class MediaPlayerService : Service(), MediaPlayer.OnErrorListener{
          if (mediaPlayer!!.isPlaying) {
              mediaPlayer!!.pause()
              resumePlayer = mediaPlayer!!.currentPosition
+             startForeground(1, sendNotificationService(R.drawable.play_arrow_fill0_wght400_grad0_opsz24))
          }
      }
      fun resumeMedia(){
          if (!mediaPlayer!!.isPlaying) {
              mediaPlayer!!.seekTo(resumePlayer)
              mediaPlayer!!.start()
+             startForeground(1, sendNotificationService(R.drawable.stop_fill0_wght400_grad0_opsz24))
          }
      }
      //
@@ -98,35 +112,42 @@ class MediaPlayerService : Service(), MediaPlayer.OnErrorListener{
      }
      override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
          try {
-             Log.d("NOTIFICATION_BROADCAST", "onStartCommand")
              val music = intent?.getParcelableExtra<com.example.firstappandmaybethelast.realmdb.Music>("song")
              if (music != null) {
+                 musicInstance = music
                  songID = music._id
                  mediaFile = music.musicSource
+                 if (mediaFile != "" && currentSong != songID) {
+                     currentSong = songID
+                     CoroutineScope(Dispatchers.IO).launch {
+                         mediaInitial()
+                         withContext(Dispatchers.IO){
+                             startForeground(1,sendNotificationService(R.drawable.stop_fill0_wght400_grad0_opsz24))
+                         }
+                     }
+                 }
              }else{
-                 Log.d("NOTIFICATION_BROADCAST", "adsf")
-                 Log.d("NOTIFICATION_BROADCAST", intent?.getStringExtra("action") ?: "")
                  when(intent?.getStringExtra("action")){
                      ACTION_NEXT -> {
                          musicAction.nextSong()
+                         startForeground(1,sendNotificationService(R.drawable.play_arrow_fill0_wght400_grad0_opsz24))
                      }
                      ACTION_PREV -> {
                         musicAction.prevSong()
+                         startForeground(1,sendNotificationService(R.drawable.play_arrow_fill0_wght400_grad0_opsz24))
                      }
                      ACTION_PLAY -> {
                          musicAction.playPause()
+                     }
+                     ACTION_KILL -> {
+                         onDestroy()
                      }
                  }
              }
          } catch (e: NullPointerException) {
              stopSelf()
          }
-         if (mediaFile != "" && currentSource != songID) {
-             currentSource = songID
-             CoroutineScope(Dispatchers.IO).launch {
-                 mediaInitial()
-             }
-         }
+
          return START_STICKY
      }
 
@@ -139,12 +160,69 @@ class MediaPlayerService : Service(), MediaPlayer.OnErrorListener{
      override fun onDestroy() {
          super.onDestroy()
          stopMedia()
-         mediaPlayer?.release()
+         stopForeground(STOP_FOREGROUND_REMOVE)
          stopSelf()
      }
+    private fun sendNotificationService(playBtn: Int): Notification {
+        var bitmap: Bitmap?
+        bitmap = ext.bitmapCurrentSong
+        if(bitmap == null) BitmapFactory.decodeResource(resources,R.drawable._9c655032_a00e_49ee_be4f_f8a474a29537)
+        val prevPending: PendingIntent = PendingIntent
+            .getBroadcast(
+                applicationContext,
+                0,
+                Intent(applicationContext, NotificationBroadcastRcv::class.java).setAction(
+                    ACTION_PREV
+                ),
+                PendingIntent.FLAG_IMMUTABLE
+            )
+        val resumePending: PendingIntent = PendingIntent
+            .getBroadcast(
+                applicationContext,
+                0,
+                Intent(applicationContext, NotificationBroadcastRcv::class.java).setAction(
+                    ACTION_PLAY
+                ),
+                PendingIntent.FLAG_IMMUTABLE
+            )
+        val nextPending: PendingIntent = PendingIntent
+            .getBroadcast(
+                applicationContext,
+                0,
+                Intent(applicationContext, NotificationBroadcastRcv::class.java).setAction(
+                    ACTION_NEXT
+                ),
+                PendingIntent.FLAG_IMMUTABLE
+            )
+        val killPending: PendingIntent = PendingIntent
+            .getBroadcast(
+                applicationContext,
+                0,
+                Intent(applicationContext,NotificationBroadcastRcv:: class.java).setAction(
+                    ACTION_KILL
+                ),
+                PendingIntent.FLAG_IMMUTABLE
+            )
+        return NotificationCompat.Builder(applicationContext, ApplicationClass.CHANNEL_ID_2)
+            .setSmallIcon(R.drawable.graphic_eq_fill0_wght400_grad0_opsz24)
+            .setContentTitle(musicInstance.title)
+            .setLargeIcon(bitmap)
+            .setContentText(musicInstance.artist)
+            .addAction(R.drawable.skip_previous_fill0_wght400_grad0_opsz24, "Previous", prevPending)
+            .addAction(playBtn, "Play", resumePending)
+            .addAction(R.drawable.skip_next_fill0_wght400_grad0_opsz24, "Next", nextPending)
+            .addAction(R.drawable.more_horiz_fill0_wght400_grad0_opsz24, "kill", killPending)
+            .setStyle(androidx.media.app.NotificationCompat.MediaStyle())
+            .setOngoing(true)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setSound(null)
+            .build()
+    }
+
      companion object{
          val ACTION_NEXT = "NEXT"
          val ACTION_PREV = "PREVIOUS"
          val ACTION_PLAY = "PLAY"
+         val ACTION_KILL = "KILL"
      }
 }

@@ -1,13 +1,14 @@
 package com.example.firstappandmaybethelast.service
 
 import android.annotation.SuppressLint
-import android.app.Notification
+import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
@@ -18,11 +19,8 @@ import android.widget.ImageButton
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.NotificationCompat
 import androidx.lifecycle.lifecycleScope
-import com.example.firstappandmaybethelast.ApplicationClass
 import com.example.firstappandmaybethelast.R
-import com.example.firstappandmaybethelast.R.drawable.icon
 import com.example.firstappandmaybethelast.databinding.MusicplayerfragmentBinding
 import com.example.firstappandmaybethelast.ext
 import com.example.firstappandmaybethelast.realmdb.Music
@@ -53,7 +51,7 @@ class MusicPlayerActivity : AppCompatActivity(), MusicAction {
     private var replay = false
     private var shuffle = false
     private var listMusicData = ext.customListMusic
-    private lateinit var notificationManager : NotificationManager
+    private var myBitmap: Bitmap? = null
     private val connection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(componentName: ComponentName?, service: IBinder?) {
             val binder = service as MediaPlayerService.MyBinder
@@ -116,14 +114,12 @@ class MusicPlayerActivity : AppCompatActivity(), MusicAction {
                 mService!!.mediaPlayer?.setOnCompletionListener {
                     if (!replay) {
                         nextSong()
-                        sendNotificationService(R.drawable.play_arrow_fill0_wght400_grad0_opsz24)
                     } else {
                         lifecycleScope.launch {
                             mService!!.resumePlayer = 0
                             mService!!.resumeMedia()
                             startRotateCover()
                             buttonPlay.setImageResource(R.drawable.stop_fill0_wght400_grad0_opsz24)
-                            sendNotificationService(R.drawable.stop_fill0_wght400_grad0_opsz24)
                         }
                     }
                 }
@@ -143,67 +139,49 @@ class MusicPlayerActivity : AppCompatActivity(), MusicAction {
     }
      override fun prevSong(){
         position -= 1
-        position %= listMusicData.size
+         position += listMusicData.size
+        position %= (listMusicData.size )
         initialSongPlayer()
+    }
+    private fun stopMusic(){
+        mService!!.pauseMedia()
+        stopRotateCover()
+        buttonPlay.setImageResource(R.drawable.play_arrow_fill0_wght400_grad0_opsz24)
+//        sendNotificationService(R.drawable.play_arrow_fill0_wght400_grad0_opsz24)
+    }
+    private fun playMusic(){
+        mService!!.resumeMedia()
+        startRotateCover()
+        buttonPlay.setImageResource(R.drawable.stop_fill0_wght400_grad0_opsz24)
+//        sendNotificationService(R.drawable.stop_fill0_wght400_grad0_opsz24)
     }
     override fun playPause(){
         if (mService!!.getPlayerStatus) {
-            mService!!.pauseMedia()
-            stopRotateCover()
-            buttonPlay.setImageResource(R.drawable.play_arrow_fill0_wght400_grad0_opsz24)
-            sendNotificationService(R.drawable.play_arrow_fill0_wght400_grad0_opsz24)
-
+            stopMusic()
         } else {
-            mService!!.resumeMedia()
-            startRotateCover()
-            buttonPlay.setImageResource(R.drawable.stop_fill0_wght400_grad0_opsz24)
-            sendNotificationService(R.drawable.stop_fill0_wght400_grad0_opsz24)
+            playMusic()
         }
     }
-    private fun sendNotificationService(playBtn: Int) = CoroutineScope(Dispatchers.IO).launch(){
-        val url = URL(musicInstance.imageResource)
-        val connection = url.openConnection() as HttpURLConnection
-        val picture = BitmapFactory.decodeStream(connection.inputStream)
-        Log.d(TAG, "sendNotificationService: $playBtn")
-        val prevPending: PendingIntent = PendingIntent
-            .getBroadcast(applicationContext,0, Intent(applicationContext,NotificationBroadcastRcv::class.java).setAction(
-                MediaPlayerService.ACTION_PREV
-            ),
-                PendingIntent.FLAG_IMMUTABLE)
-        val resumePending: PendingIntent = PendingIntent
-            .getBroadcast(applicationContext,0,Intent(applicationContext,NotificationBroadcastRcv::class.java).setAction(
-                MediaPlayerService.ACTION_PLAY
-            ),
-                PendingIntent.FLAG_IMMUTABLE)
-        val nextPending: PendingIntent = PendingIntent
-            .getBroadcast(applicationContext,0,Intent(applicationContext,NotificationBroadcastRcv::class.java).setAction(
-                MediaPlayerService.ACTION_NEXT
-            ),
-                PendingIntent.FLAG_IMMUTABLE)
-        val notification: Notification = NotificationCompat.Builder(applicationContext, ApplicationClass.CHANNEL_ID_2)
-            .setSmallIcon(icon)
-            .setLargeIcon(picture)
-            .setContentTitle(musicInstance.title)
-            .setContentText(musicInstance.artist)
-            .addAction(R.drawable.skip_previous_fill0_wght400_grad0_opsz24, "Previous", prevPending)
-            .addAction(playBtn, "Play", resumePending)
-            .addAction(R.drawable.skip_next_fill0_wght400_grad0_opsz24, "Next", nextPending)
-            .setStyle(androidx.media.app.NotificationCompat.MediaStyle()
-//                 .setMediaSession(mediaSession.sessionToken)
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val serviceChannel = NotificationChannel(
+                "ChannelId", "Music Player",
+                NotificationManager.IMPORTANCE_LOW
             )
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setSound(null)
-            .build()
-        notificationManager.notify(0, notification)
+            val manager = getSystemService(NotificationManager::class.java)
+            manager!!.createNotificationChannel(serviceChannel)
+        }
     }
     private fun initialSongPlayer(){
         musicInstance = listMusicData[position]
         CoroutineScope(Dispatchers.IO).launch {
             val url = URL(musicInstance.imageResource)
             val connection = url.openConnection() as HttpURLConnection
-            val myBitmap = BitmapFactory.decodeStream(connection.inputStream)
+            myBitmap = BitmapFactory.decodeStream(connection.inputStream)
+            ext.bitmapCurrentSong = myBitmap
             withContext(Dispatchers.Main) {
                 binding.musicCover.setImageBitmap(myBitmap)
+
             }
         }
         stopRotateCover()
@@ -220,9 +198,11 @@ class MusicPlayerActivity : AppCompatActivity(), MusicAction {
                         Log.d("TAG", "initialSongPlayer: ${mService!!._successOnPrepare}")
                         delay(100)
                     }
+                    Log.d("Service", "Executed")
                     seekBarFuture()
                     buttonListener()
-                    updateNotificationState()
+                    playMusic()
+
                 }catch (e: Exception){
                     Log.d(TAG, "initialSongPlayer: $e")
                     Toast.makeText(
@@ -230,17 +210,10 @@ class MusicPlayerActivity : AppCompatActivity(), MusicAction {
                         "Time out, Please check your connection",
                         Toast.LENGTH_SHORT
                     ).show()
+                    stopService(Intent(applicationContext, MediaPlayerService::class.java))
                     finish()
                 }
             }
-        }
-    }
-    private fun updateNotificationState(){
-        Log.d( TAG, "updateNotificationState: ${mService!!.getPlayerStatus}")
-        if(mService!!.getPlayerStatus){
-            sendNotificationService(R.drawable.stop_fill0_wght400_grad0_opsz24)
-        }else{
-            sendNotificationService(R.drawable.play_arrow_fill0_wght400_grad0_opsz24)
         }
     }
     private fun uiBuilding(){
@@ -286,7 +259,7 @@ class MusicPlayerActivity : AppCompatActivity(), MusicAction {
         setContentView(binding.root)
         position = intent.getIntExtra(mediaPosition, 0)
         uiBuilding()
-        notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        createNotificationChannel()
         initialSongPlayer()
 
     }

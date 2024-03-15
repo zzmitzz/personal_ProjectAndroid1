@@ -24,13 +24,16 @@ class HomeFragment : Fragment() {
 
     private val viewModel by viewModels<HomeViewModel>()
     override fun onCreate(savedInstanceState: Bundle?) {
+
         viewModel.musicAdapter.onItemClick = {
+            ext.customListMusic = viewModel.listTop10song
             Intent(context,MusicPlayerActivity::class.java).apply {
                 putExtra("mediaPosition", it)
                 startActivity(this)
             }
         }
         viewModel.musicPlaylistAdapter.itemClick = {
+
             Intent(context,PlaylistActivityLazy::class.java).apply {
                 putExtra("album", it)
                 startActivity(this)
@@ -45,9 +48,8 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle ?
     ): View {
-        viewModel.musicAdapter.setMusic(ext.listMusic)
-        ext.customListMusic = ext.listMusic
         setupRecycleView()
+
         return binding.root
     }
 
@@ -56,7 +58,11 @@ class HomeFragment : Fragment() {
             setHasFixedSize(true)
             adapter = viewModel.musicPlaylistAdapter
         }
-        binding.rcv2.run {
+        binding.rcv2.run{
+            setHasFixedSize(true)
+            adapter = viewModel.artistListAdapter
+        }
+        binding.rcv3.run {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(context)
             adapter= viewModel.musicAdapter

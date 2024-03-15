@@ -31,7 +31,6 @@ class SearchFragment : Fragment() {
     ): View = binding.root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        viewmodel.musicAdapter.setMusic(emptyList())
         binding.rcvSearch.run {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(context)

@@ -7,11 +7,13 @@ import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.example.firstappandmaybethelast.R
 import com.example.firstappandmaybethelast.databinding.FragmentPlaylistBinding
 import com.example.firstappandmaybethelast.ext
 import com.example.firstappandmaybethelast.realmdb.Album
 import com.example.firstappandmaybethelast.service.MusicPlayerActivity
 import com.example.firstappandmaybethelast.viewmodel.PlaylistActivityViewModel
+import com.squareup.picasso.Picasso
 import kotlinx.coroutines.launch
 
 // Not set the view pager yet, Update it soon. Now let fuck up with activity
@@ -29,16 +31,18 @@ class PlaylistActivityLazy: AppCompatActivity() {
         setContentView(binding.root)
         position = intent.getIntExtra("album", 0)
         album = ext.customAlbumList[position]
-        viewModel.setCurrentAlbum(album)
-        setRecyclerView()
+        Log.d("PlaylistActivity", album.musicList.size.toString())
+        Picasso.get()
+            .load(album.imageSource)
+            .error(R.drawable._31f9ec4b_d0d1_4f4b_a104_94450e11e8da)
+            .into(binding.imageView1)
         lifecycleScope.launch {
-            viewModel.viewModelShowMusic()
+            viewModel.viewModelShowMusic(album)
             viewModel.ready.collect {
+                Log.d("PlaylistLazy", it.toString() )
                 if (it) {
                     binding.progressBar2.visibility = View.INVISIBLE
                     setRecyclerView()
-                    Log.d("PlaylistActivity", viewModel.ready.toString())
-                    Log.d("PlaylistActivity", viewModel.toString())
                 }
             }
         }

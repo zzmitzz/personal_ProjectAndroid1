@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.firstappandmaybethelast.MainActivity
 import com.example.firstappandmaybethelast.databinding.WelcomepageBinding
+import com.example.firstappandmaybethelast.ext
 
 class WelcomePage: AppCompatActivity() {
 
@@ -18,6 +19,7 @@ class WelcomePage: AppCompatActivity() {
         setContentView(binding.root)
         Log.d("Welcome Page", "onCreate")
         binding.button.setOnClickListener{
+
             val pref = getSharedPreferences(PREF_NAME, MODE_PRIVATE)
             if(pref.getString("user","") == "" || pref.getString("password","") == "" ){
                 Intent(this,LoginPage::class.java).also {
@@ -31,6 +33,7 @@ class WelcomePage: AppCompatActivity() {
             }
         }
         binding.guestmode.setOnClickListener{
+            ext.isLogin = false
             Intent(this,MainActivity::class.java).also {
                 startActivity(it)
             }

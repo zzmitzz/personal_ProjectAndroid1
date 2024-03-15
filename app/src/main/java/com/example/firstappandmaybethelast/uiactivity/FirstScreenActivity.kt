@@ -11,9 +11,9 @@ import com.example.firstappandmaybethelast.databinding.SplashscreenBinding
 import com.example.firstappandmaybethelast.ext
 import com.example.firstappandmaybethelast.model.ServiceLocator
 import com.example.firstappandmaybethelast.musicdata.Album
+import com.example.firstappandmaybethelast.musicdata.Artist
 import com.example.firstappandmaybethelast.musicdata.Music
 import io.realm.kotlin.UpdatePolicy
-import io.realm.kotlin.types.RealmObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -53,15 +53,20 @@ class FirstScreenActivity : AppCompatActivity() {
                         binding.processText.text = "Downloading Album..."
                     }
                     val resultAlbum: List<Album> = ServiceLocator.apiAction.getAlbum()
-//                    Log.d("firstScreen", resultAlbum[0].tracks.toString())
-//                     Write to local db Realm
+                    runOnUiThread{
+                        binding.processText.text = "Downloading Artist..."
+                    }
+                    val resultArtist: List<Artist> = ServiceLocator.apiAction.getArtist()
                     ext.realm.write {
                         deleteAll()
                         for((index,music) in result!!.withIndex()){
-                            copyToRealm(cvtToRealmMusic(music,index), updatePolicy = UpdatePolicy.ALL)
+                            copyToRealm(ext.cvtToRealmMusic(music), updatePolicy = UpdatePolicy.ALL)
                         }
                         for((index,album) in resultAlbum.withIndex()){
-                            copyToRealm(cvtToRealmAlbum(album,index), updatePolicy = UpdatePolicy.ALL)
+                            copyToRealm(ext.cvtToRealmAlbum(album), updatePolicy = UpdatePolicy.ALL)
+                        }
+                        for((index,artist) in resultArtist.withIndex()){
+                            copyToRealm(ext.cvtToRealmArtist(artist), updatePolicy = UpdatePolicy.ALL)
                         }
                     }
                     Intent(this@FirstScreenActivity, WelcomePage::class.java).run {
@@ -74,15 +79,7 @@ class FirstScreenActivity : AppCompatActivity() {
         },1000)
     }
 
-    private fun cvtToRealmAlbum(album: Album, index: Int): RealmObject {
-        return com.example.firstappandmaybethelast.realmdb.Album().apply {
-            this.id = album.id
-            this.title = album.nameAlbum
-            this.imageSource = album.image.trim()
-            val listIDMusic: List<String> = album.tracks
-            this.musicList.addAll(listIDMusic)
-        }
-    }
+
 
     private fun isOnline(): Boolean {
         return try {
@@ -96,16 +93,5 @@ class FirstScreenActivity : AppCompatActivity() {
             false
         }
     }
-    private fun cvtToRealmMusic(music: Music, index: Int): com.example.firstappandmaybethelast.realmdb.Music{
-        return com.example.firstappandmaybethelast.realmdb.Music().apply {
-            _id = music.id
-            title = music.title
-            artist = music.artist
-            genre = music.genre
-            musicSource = music.musicSource
-            imageResource = music.imageResource
-            isFavorite = false
-            order = index
-        }
-    }
+
 }

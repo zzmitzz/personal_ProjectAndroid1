@@ -8,6 +8,9 @@ import com.example.firstappandmaybethelast.realmdb.Music
 class SearchViewModel: ViewModel() {
     private var _musicAdapter = MusicAdapter()
     val musicAdapter = _musicAdapter
+    init{
+        _musicAdapter.setMusic(ext.listMusic)
+    }
     fun filterArray(newText: String?){
         val filterList = ArrayList<Music>()
         for(music in ext.listMusic){

@@ -12,11 +12,11 @@ import com.squareup.picasso.Picasso
 
 class MusicAdapter: RecyclerView.Adapter<MusicAdapter.ViewHolderMusic>() {
 
-    private var musicList = emptyList<Music>()
+    private var musicList = emptyList<Music?>()
     var onItemClick: ((Int) -> Unit)? = null
 
     @SuppressLint("NotifyDataSetChanged")
-    fun setMusic(musicListNew: List<Music>){
+    fun setMusic(musicListNew: List<Music?>){
         musicList = musicListNew
         notifyDataSetChanged() // It will re execute getSize and binder function below whenever data change
     }
@@ -54,7 +54,7 @@ class MusicAdapter: RecyclerView.Adapter<MusicAdapter.ViewHolderMusic>() {
     }
 
     override fun onBindViewHolder(holder: ViewHolderMusic, position: Int) {
-        holder.binder(musicList[position])
+        musicList[position]?.let { holder.binder(it) }
         holder.itemView.setOnClickListener{
             onItemClick?.invoke(position)
         }

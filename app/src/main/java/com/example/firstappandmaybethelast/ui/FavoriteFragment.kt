@@ -22,6 +22,17 @@ class FavoriteFragment : Fragment() {
         return binding.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        inflateData()
+    }
+    private fun inflateData(){
+
+        binding.rcv2.apply {
+            setHasFixedSize(true)
+            adapter = viewmodel.musicAdapter
+        }
+    }
     companion object {
 
     }

@@ -2,13 +2,13 @@ package com.example.firstappandmaybethelast.uiactivity
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.firstappandmaybethelast.MainActivity
 import com.example.firstappandmaybethelast.databinding.LoginpageBinding
+import com.example.firstappandmaybethelast.ext
 import com.example.firstappandmaybethelast.model.ServiceLocator
 import com.example.firstappandmaybethelast.musicdata.User
 import com.google.gson.Gson
@@ -42,7 +42,7 @@ class LoginPage: AppCompatActivity() {
                                         finish()
                                     }
     private fun checkAuthentication() {
-        val user = binding.editTextUsername.text.toString()
+        var user = binding.editTextUsername.text.toString()
         val password = binding.editTextPassword.text.toString()
         val body: Map<String,Any> = mapOf(
             "user" to user,
@@ -65,8 +65,9 @@ class LoginPage: AppCompatActivity() {
                             invalid = true
                         }else{
                             var user: User = gson.fromJson(responseBody, User::class.java)
+                            ext.user= user
+                            ext.isLogin = true
                             invalid = false
-                            Log.d("AuthUser", user.username)
                         }
                     }
                 }
@@ -91,7 +92,7 @@ class LoginPage: AppCompatActivity() {
                 binding.editTextPassword.setText("")
             }
             runOnUiThread {
-                binding.progressBar.visibility = View.VISIBLE
+                binding.progressBar.visibility = View.INVISIBLE
             }
         }
     }

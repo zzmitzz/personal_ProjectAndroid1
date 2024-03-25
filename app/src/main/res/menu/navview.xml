@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <group >
+        <item
+            android:id="@+id/firstComponent"
+            android:title="Info1"
+            android:icon="@color/white">
+        </item>
+        <item
+            android:id="@+id/secondComponent"
+            android:title="Info2"
+            android:icon="@color/white">
+        </item>
+        <item
+            android:id="@+id/thirdComponent"
+            android:title="Info3"
+            android:icon="@color/white">
+        </item>
+
+    </group>
+</menu>

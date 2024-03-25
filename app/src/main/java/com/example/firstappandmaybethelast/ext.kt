@@ -1,6 +1,7 @@
 package com.example.firstappandmaybethelast
 
 import android.graphics.Bitmap
+import android.util.Log
 import com.example.firstappandmaybethelast.model.ServiceLocator
 import com.example.firstappandmaybethelast.musicdata.User
 import com.example.firstappandmaybethelast.realmdb.Album
@@ -12,6 +13,7 @@ import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.types.RealmObject
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withTimeout
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
@@ -23,6 +25,7 @@ object ext {
     var listMusic: List<Music> = getMusicData()
     var customListMusic: List<Music> = emptyList()
     var customAlbumList: MutableList<Album> = mutableListOf()
+    var customArtistList: MutableList<Artist> = mutableListOf()
     var user: User? = null
     var bitmapCurrentSong : Bitmap? = null
     private val gson = Gson()
@@ -55,8 +58,15 @@ object ext {
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
             }
         })
-        while(result == null){
-            delay(50)
+        withTimeout(1000){
+            try {
+                while(result == null){
+                    delay(100)
+                    Log.d("ArtistTest", "Get Song")
+                }
+            } catch (e: Exception) {
+                result = null
+            }
         }
         return result
     }

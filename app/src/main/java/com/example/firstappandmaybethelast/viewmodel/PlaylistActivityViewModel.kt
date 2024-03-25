@@ -1,5 +1,6 @@
 package com.example.firstappandmaybethelast.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.firstappandmaybethelast.adapter.MusicAdapter
 import com.example.firstappandmaybethelast.ext
@@ -21,6 +22,7 @@ class PlaylistActivityViewModel : ViewModel() {
     fun viewModelShowMusic(album: Album) {
         CoroutineScope(Dispatchers.IO).launch{
             for(id in album.musicList){
+                Log.d("ArtistTest", id)
                 var music: com.example.firstappandmaybethelast.musicdata.Music? = ext.getSongByID(id)
                 if(music != null){
                     listMusic.add(ext.cvtToRealmMusic(music))
@@ -29,7 +31,6 @@ class PlaylistActivityViewModel : ViewModel() {
             withContext(Dispatchers.Main){_adapter.setMusic(listMusic)}
             ext.customListMusic = listMusic
             ready.update {true}
-
             }
         }
 

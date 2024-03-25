@@ -32,6 +32,7 @@
 
 
         </receiver>
+        <activity android:name=".uiactivity.ArtistActivityLazy"></activity>
         <activity android:name=".uiactivity.FirstScreenActivity"
                 android:exported="true">
             <intent-filter>

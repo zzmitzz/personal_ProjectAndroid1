@@ -59,13 +59,13 @@ class FirstScreenActivity : AppCompatActivity() {
                     val resultArtist: List<Artist> = ServiceLocator.apiAction.getArtist()
                     ext.realm.write {
                         deleteAll()
-                        for((index,music) in result!!.withIndex()){
+                        for(music in result!!){
                             copyToRealm(ext.cvtToRealmMusic(music), updatePolicy = UpdatePolicy.ALL)
                         }
-                        for((index,album) in resultAlbum.withIndex()){
+                        for(album in resultAlbum){
                             copyToRealm(ext.cvtToRealmAlbum(album), updatePolicy = UpdatePolicy.ALL)
                         }
-                        for((index,artist) in resultArtist.withIndex()){
+                        for(artist in resultArtist){
                             copyToRealm(ext.cvtToRealmArtist(artist), updatePolicy = UpdatePolicy.ALL)
                         }
                     }

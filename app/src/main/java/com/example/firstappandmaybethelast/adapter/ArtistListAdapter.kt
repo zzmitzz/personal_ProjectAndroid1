@@ -10,7 +10,7 @@ import com.squareup.picasso.Picasso
 
 class ArtistListAdapter: RecyclerView.Adapter<ArtistListAdapter.ArtistViewHolder>() {
     private var musicList = emptyList<Artist>()
-    private var onItemClick : ((Int) -> Unit)? = null
+     var onItemClick : ((Int) -> Unit)? = null
     fun setData(list: List<Artist>){
         this.musicList = list
         notifyDataSetChanged()

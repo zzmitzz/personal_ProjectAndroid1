@@ -29,6 +29,7 @@
         android:marqueeRepeatLimit="marquee_forever"
         android:scrollHorizontally="true"
         android:singleLine="true"
+        android:textColor="@color/white"
         android:textAlignment="center"
         android:layout_marginTop="5dp"
         android:textSize="15sp"

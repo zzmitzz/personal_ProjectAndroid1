@@ -19,7 +19,8 @@ class HomeViewModel: ViewModel() {
         get() = _artistListAdapter
     init {
         ext.customAlbumList = ext.getAlbumData().toMutableList()
-        _artistListAdapter.setData(ext.getArtistData())
+        ext.customArtistList = ext.getArtistData().toMutableList()
+        _artistListAdapter.setData(ext.customArtistList)
         _musicPlaylistAdapter.setList(ext.customAlbumList)
         _musicAdapter.setMusic(listTop10song)
     }

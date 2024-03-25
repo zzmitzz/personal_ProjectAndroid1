@@ -1,5 +1,6 @@
 package com.example.firstappandmaybethelast
 
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.example.firstappandmaybethelast.databinding.ActivityMainBinding
 import com.example.firstappandmaybethelast.ui.FavoriteFragment
@@ -7,12 +8,14 @@ import com.example.firstappandmaybethelast.ui.HomeFragment
 import com.example.firstappandmaybethelast.ui.NearbyFragent
 import com.example.firstappandmaybethelast.ui.SearchFragment
 import com.example.firstappandmaybethelast.ui.SettingFragment
+import com.example.firstappandmaybethelast.viewmodel.SharedViewModel
 
 private const val TAG = "MainActivity"
 class MainActivity : AppCompatActivity() {
     private val binding by lazy(LazyThreadSafetyMode.NONE) {
         ActivityMainBinding.inflate(layoutInflater)
     }
+    private val viewModel by viewModels<SharedViewModel>()
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)

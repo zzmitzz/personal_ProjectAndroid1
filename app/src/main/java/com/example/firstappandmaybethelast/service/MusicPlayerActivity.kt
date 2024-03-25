@@ -14,6 +14,7 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.util.Log
+import android.view.View
 import android.view.animation.LinearInterpolator
 import android.widget.ImageButton
 import android.widget.SeekBar
@@ -129,19 +130,23 @@ class MusicPlayerActivity : AppCompatActivity(), MusicAction {
     }
 
      override fun nextSong(){
-        if(shuffle) {
-            position = Random.nextInt(0, listMusicData.size - 1)
-        } else {
-            position += 1
-            position %= listMusicData.size
+        if(mService!!._successOnPrepare){
+            if(shuffle) {
+                position = Random.nextInt(0, listMusicData.size - 1)
+            } else {
+                position += 1
+                position %= listMusicData.size
+            }
+            initialSongPlayer()
         }
-        initialSongPlayer()
     }
      override fun prevSong(){
-        position -= 1
-         position += listMusicData.size
-        position %= (listMusicData.size )
-        initialSongPlayer()
+         if(mService!!._successOnPrepare){
+             position -= 1
+             position += listMusicData.size
+             position %= (listMusicData.size )
+             initialSongPlayer()
+         }
     }
     private fun stopMusic(){
         mService!!.pauseMedia()
@@ -173,6 +178,7 @@ class MusicPlayerActivity : AppCompatActivity(), MusicAction {
         }
     }
     private fun initialSongPlayer(){
+        binding.overLayout.visibility = View.VISIBLE
         musicInstance = listMusicData[position]
         CoroutineScope(Dispatchers.IO).launch {
             val url = URL(musicInstance.imageResource)
@@ -181,7 +187,6 @@ class MusicPlayerActivity : AppCompatActivity(), MusicAction {
             ext.bitmapCurrentSong = myBitmap
             withContext(Dispatchers.Main) {
                 binding.musicCover.setImageBitmap(myBitmap)
-
             }
         }
         stopRotateCover()
@@ -195,21 +200,20 @@ class MusicPlayerActivity : AppCompatActivity(), MusicAction {
                     if(mService == null) delay(200L) // For getting mService ready
                     mService!!._successOnPrepare = false
                     while(!mService!!._successOnPrepare){
-                        Log.d("TAG", "initialSongPlayer: ${mService!!._successOnPrepare}")
                         delay(100)
                     }
-                    Log.d("Service", "Executed")
                     seekBarFuture()
                     buttonListener()
+                    loadingSuccess()
                     playMusic()
 
                 }catch (e: Exception){
-                    Log.d(TAG, "initialSongPlayer: $e")
                     Toast.makeText(
                         this@MusicPlayerActivity,
                         "Time out, Please check your connection",
                         Toast.LENGTH_SHORT
                     ).show()
+                    Log.d("Error", e.toString())
                     stopService(Intent(applicationContext, MediaPlayerService::class.java))
                     finish()
                 }
@@ -260,6 +264,7 @@ class MusicPlayerActivity : AppCompatActivity(), MusicAction {
         position = intent.getIntExtra(mediaPosition, 0)
         uiBuilding()
         createNotificationChannel()
+        binding.constraintCard.visibility = View.GONE
         initialSongPlayer()
 
     }
@@ -269,6 +274,10 @@ class MusicPlayerActivity : AppCompatActivity(), MusicAction {
             this.unbindService(connection)
             mBound = false
         }
+    }
+    private fun loadingSuccess() {
+        binding.overLayout.visibility = View.GONE
+        binding.constraintCard.visibility = View.VISIBLE
     }
     companion object {
         const val musicResource = "songPath"

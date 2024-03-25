@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.firstappandmaybethelast.databinding.FragmentHomeBinding
 import com.example.firstappandmaybethelast.ext
 import com.example.firstappandmaybethelast.service.MusicPlayerActivity
+import com.example.firstappandmaybethelast.uiactivity.ArtistActivityLazy
 import com.example.firstappandmaybethelast.uiactivity.PlaylistActivityLazy
 import com.example.firstappandmaybethelast.viewmodel.HomeViewModel
 
@@ -25,6 +26,10 @@ class HomeFragment : Fragment() {
     private val viewModel by viewModels<HomeViewModel>()
     override fun onCreate(savedInstanceState: Bundle?) {
 
+
+        binding.btnMenu.setOnClickListener {
+            binding.drawerLayout.open()
+        }
         viewModel.musicAdapter.onItemClick = {
             ext.customListMusic = viewModel.listTop10song
             Intent(context,MusicPlayerActivity::class.java).apply {
@@ -36,6 +41,12 @@ class HomeFragment : Fragment() {
 
             Intent(context,PlaylistActivityLazy::class.java).apply {
                 putExtra("album", it)
+                startActivity(this)
+            }
+        }
+        viewModel.artistListAdapter.onItemClick = {
+            Intent(context,ArtistActivityLazy::class.java).apply {
+                putExtra("artist", it)
                 startActivity(this)
             }
         }

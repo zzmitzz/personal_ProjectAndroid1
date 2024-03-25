@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#000000"
     tools:context=".ui.SettingFragment">
 
     <!-- TODO: Update blank fragment layout -->
@@ -28,6 +29,7 @@
         android:layout_marginTop="30dp"
         android:text="Name"
         android:textSize="25sp"
+        android:textColor="@color/white"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -39,6 +41,8 @@
         android:layout_marginStart="50dp"
         android:layout_marginTop="20dp"
         android:text="@string/dark_mode"
+
+        android:textColor="@color/white"
         android:textSize="25sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/textView4"
@@ -54,6 +58,7 @@
         android:text="@string/english"
         android:textSize="25sp"
 
+        android:textColor="@color/white"
         android:layout_marginTop="25dp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/textView7"
@@ -67,6 +72,7 @@
         android:layout_marginTop="25dp"
         android:text="@string/log_out"
         android:textSize="25sp"
+        android:textColor="@color/white"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -79,6 +85,7 @@
         android:layout_marginEnd="32dp"
         app:layout_constraintBottom_toBottomOf="@+id/textView3"
         app:layout_constraintEnd_toEndOf="parent"
+        android:backgroundTint="@color/white"
         app:layout_constraintTop_toTopOf="@+id/textView3"
         tools:ignore="UseSwitchCompatOrMaterialXml" />
 

@@ -39,7 +39,6 @@ class PlaylistActivityLazy: AppCompatActivity() {
         lifecycleScope.launch {
             viewModel.viewModelShowMusic(album)
             viewModel.ready.collect {
-                Log.d("PlaylistLazy", it.toString() )
                 if (it) {
                     binding.progressBar2.visibility = View.INVISIBLE
                     setRecyclerView()
@@ -61,7 +60,6 @@ class PlaylistActivityLazy: AppCompatActivity() {
             adapter = viewModel.adapter
             setHasFixedSize(true)
         }
-
     }
 }
 
